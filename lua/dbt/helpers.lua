@@ -13,4 +13,16 @@ function M.find_project_root(start_path)
 	return vim.fs.dirname(vim.fs.abspath(hit))
 end
 
+function M.create_preview_win()
+	local preview = {
+		bufnr = vim.api.nvim_create_buf(false, true),
+		winid = vim.api.nvim_get_current_win(),
+	}
+	vim.cmd("vsplit")
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = preview.bufnr })
+	vim.api.nvim_set_option_value("filetype", "sql", { buf = preview.bufnr })
+	vim.api.nvim_win_set_buf(preview.winid, preview.bufnr)
+	return preview
+end
+
 return M
