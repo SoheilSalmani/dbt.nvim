@@ -1,5 +1,9 @@
 local M = {}
 
+local state = {
+	preview = nil,
+}
+
 function M.find_project_root(start_path)
 	local path = start_path
 	local stat = vim.uv.fs_stat(path)
@@ -14,15 +18,30 @@ function M.find_project_root(start_path)
 end
 
 function M.create_preview_win()
-	local preview = {
+	-- Return existing preview window if it exists
+	if state.preview then
+		return state.preview
+	end
+
+	-- Create new preview window
+	state.preview = {
 		bufnr = vim.api.nvim_create_buf(false, true),
 		winid = vim.api.nvim_get_current_win(),
 	}
 	vim.cmd("vsplit")
-	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = preview.bufnr })
-	vim.api.nvim_set_option_value("filetype", "sql", { buf = preview.bufnr })
-	vim.api.nvim_win_set_buf(preview.winid, preview.bufnr)
-	return preview
+	vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = state.preview.bufnr })
+	vim.api.nvim_set_option_value("filetype", "sql", { buf = state.preview.bufnr })
+	vim.api.nvim_win_set_buf(state.preview.winid, state.preview.bufnr)
+
+	-- Set autocmd to clear state.preview when the buffer is wiped out
+	vim.api.nvim_create_autocmd("BufWipeout", {
+		buffer = state.preview.bufnr,
+		callback = function()
+			state.preview = nil
+		end,
+	})
+
+	return state.preview
 end
 
 return M
