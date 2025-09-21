@@ -11,23 +11,28 @@ M.defaults = {
 	vars = nil,
 }
 
-function M.validate(config)
-	vim.validate("dbt_executable", config.dbt_executable, "string")
-	vim.validate("compile_on_preview", config.compile_on_preview, "boolean")
-	vim.validate("select_current_only", config.select_current_only, "boolean")
-	vim.validate("auto_refresh_when_open", config.auto_refresh_when_open, "boolean")
-	vim.validate("window", config.window, "table")
-	vim.validate("window.width", config.window.width, "number")
-	vim.validate("window.height", config.window.height, "number")
-	vim.validate("window.border", config.window.border, "string")
-	vim.validate("profiles_dir", config.profiles_dir, "string", true)
-	vim.validate("target", config.target, "string", true)
-	vim.validate("vars", config.target, "table", true)
+local current = vim.deepcopy(M.defaults)
+
+M.get = function()
+	return current
 end
 
-function M.merge_with_defaults(config)
-	-- TODO: Check whether `defaults` is mutated
-	return vim.tbl_deep_extend("force", M.defaults, config or {})
+function M.validate()
+	vim.validate("dbt_executable", current.dbt_executable, "string")
+	vim.validate("compile_on_preview", current.compile_on_preview, "boolean")
+	vim.validate("select_current_only", current.select_current_only, "boolean")
+	vim.validate("auto_refresh_when_open", current.auto_refresh_when_open, "boolean")
+	vim.validate("window", current.window, "table")
+	vim.validate("window.width", current.window.width, "number")
+	vim.validate("window.height", current.window.height, "number")
+	vim.validate("window.border", current.window.border, "string")
+	vim.validate("profiles_dir", current.profiles_dir, "string", true)
+	vim.validate("target", current.target, "string", true)
+	vim.validate("vars", current.target, "table", true)
+end
+
+function M.update(partial)
+	current = vim.tbl_deep_extend("force", current, partial or {})
 end
 
 return M
