@@ -45,8 +45,8 @@ function M.create_preview_win()
 end
 
 function M.run_dbt_command(args, config)
-	local result = vim.system({ config.dbt_executable, unpack(args) }, { text = true }):wait()
-	return result.stdout, result.stderr
+	local result = vim.system({ config.dbt_executable, unpack(args) }):wait()
+	return result.code, result.stdout, result.stderr
 end
 
 return M
