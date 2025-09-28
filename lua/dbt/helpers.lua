@@ -49,4 +49,38 @@ function M.run_dbt_command(args, config)
 	return result.code, result.stdout, result.stderr
 end
 
+function M.multi_select(items, opts, on_finish)
+	opts = opts or {}
+	local selected = {}
+
+	opts.format_item = function(item)
+		if selected[item] then
+			return item .. " (selected)"
+		else
+			return item
+		end
+	end
+
+	local function step()
+		vim.ui.select(items, opts, function(choice)
+			if not choice then
+				local results = {}
+				for item, is_selected in pairs(selected) do
+					if is_selected then
+						table.insert(results, item)
+					end
+				end
+
+				on_finish(results)
+				return
+			end
+
+			selected[choice] = not selected[choice]
+			step()
+		end)
+	end
+
+	step()
+end
+
 return M
